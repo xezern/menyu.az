@@ -9,3 +9,4 @@ uploads
 ./index.htm
 .vercel
 node_modules
+*.zip
