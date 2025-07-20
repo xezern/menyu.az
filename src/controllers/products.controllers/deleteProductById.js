@@ -1,31 +1,32 @@
-const { PrismaClient } = require('@prisma/client');
-const deleteImageByPathname = require('../img.controller/deleteImgByPathname');
-const prisma = new PrismaClient();
+const db = require('../../config/db');
+const fs = require('fs');
+const path = require('path');
 
 const deleteProductById = async (req, res) => {
     try {
         const id = Number(req.params.id);
 
-        const product = await prisma.product.findUnique({
-            where: { id },
-        });
-
-        if (!product) {
+        const [rows] = await db.execute('SELECT * FROM Product WHERE id = ?', [id]);
+        if (rows.length === 0) {
             return res.status(404).json({ error: 'Product not found' });
         }
 
-        if (product.img && product.img.length > 0) {
-            for (const imageUrl of product.img) {
+        const product = rows[0];
+        const imgs = JSON.parse(product.img);
+
+        if (imgs && imgs.length > 0) {
+            for (const imageUrl of imgs) {
                 const filename = imageUrl.split('/').pop();
-                await deleteImageByPathname(filename);
+                const filePath = path.join(__dirname, '..', '..', 'uploads', filename);
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
             }
         }
 
-        const deletedProduct = await prisma.product.delete({
-            where: { id },
-        });
+        await db.execute('DELETE FROM Product WHERE id = ?', [id]);
 
-        res.status(200).json({ message: 'Product deleted successfully', deletedProduct });
+        res.status(200).json({ message: 'Product deleted successfully', deletedProduct: product });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

@@ -4,7 +4,7 @@ const path = require('path');
 const deleteImage = async (req, res) => {
     const { filename } = req.params;
 
-    const filePath = path.join(__dirname, '..', '..', '..', 'uploads', filename); // doğru yola gedir
+    const filePath = path.join(__dirname, '..', '..', '..', 'uploads', filename); 
 
     try {
         if (fs.existsSync(filePath)) {

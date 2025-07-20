@@ -1,36 +1,35 @@
 const bcrypt = require('bcrypt');
-const { PrismaClient } = require('@prisma/client');
+const db = require('../../config/db'); // mysql2 bağlantısı
 const { generateAccesToken, generateRefreshToken } = require('./jwt.controller');
-const prisma = new PrismaClient();
-
 
 const login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        console.log(username, password);
+        const [rows] = await db.execute(
+            'SELECT * FROM User WHERE username = ?',
+            [username]
+        );
 
-        const existingUser = await prisma.user.findUnique({
-            where: { username }
-        });
-
-        if (!existingUser) {
+        if (rows.length === 0) {
             return res.status(401).json({ error: 'Invalid username credentials' });
         }
 
-        const validPassword = await bcrypt.compare(password, existingUser.password);
+        const user = rows[0];
+        const validPassword = await bcrypt.compare(password, user.password);
 
         if (!validPassword) {
             return res.status(401).json({ error: 'Invalid username credentials' });
         }
 
-        const token = generateAccesToken({ userid: existingUser.id, role: 'ADMIN' })
-        const refresh = generateRefreshToken({ userid: existingUser.id, role: 'ADMIN' })
+        const token = generateAccesToken({ userid: user.id, role: user.role });
+        const refresh = generateRefreshToken({ userid: user.id, role: user.role });
 
         res.status(200).json({ refresh, token, status: true });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Server error' });
     }
 };
 
-module.exports = login; 
+module.exports = login;

@@ -1,14 +1,4 @@
-const { z } = require('zod');
-
-// const imageSchema = z.object({
-//     img: z.object({
-//         location: z.string().url(),
-//         originalname: z.string().regex(/.*\.(jpg|jpeg|png|gif)$/i, 'Invalid file type'),
-//     }),
-// });
-
 function createImg(req, res) {
-
     if (req.file.fieldname !== 'img') {
         res.status(400).json({
             message: `Sizden gözlənilən field name: "img", Sizin göndərdiyiniz filed name: ${req.file.fieldname} `,

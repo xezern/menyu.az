@@ -1,8 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
+const db = require('../../config/db');
 const { z } = require('zod');
 const productSchema = require('../../schema/product.schema');
-const prisma = new PrismaClient();
-
 
 const createProduct = async (req, res) => {
     const parseResult = productSchema.safeParse({
@@ -18,38 +16,61 @@ const createProduct = async (req, res) => {
 
     try {
         const {
-            img, name_az, name_en, name_ru, description_az, description_en, description_ru, price, metadata, categoryId, subcategoryId, category, subcategory, ingridients, sizes, status, isStok } = parseResult.data;
+            img, name_az, name_en, name_ru, description_az,
+            description_en, description_ru, price, metadata,
+            categoryId, subcategoryId, ingridients, sizes, status, isStok
+        } = parseResult.data;
 
-        const isCategory = await prisma.category.findUnique({
-            where: { id: categoryId }
-        });
-        const isSubcategory = await prisma.subcategory.findUnique({
-            where: { id: subcategoryId }
-        });
+        const [cat] = await db.execute('SELECT id FROM Category WHERE id = ?', [categoryId]);
+        const [subcat] = await db.execute('SELECT id FROM Subcategory WHERE id = ?', [subcategoryId]);
 
-        if (!isCategory || !isSubcategory) {
+        if (cat.length === 0 || subcat.length === 0) {
             return res.status(400).json({ error: 'Kateqoriya və ya alt kateqoriya mövcud deyil' });
         }
 
-        const product = await prisma.product.create({
-            data: {
-                img,
+        const [result] = await db.execute(
+            `INSERT INTO Product (
+                img, name_az, name_en, name_ru, description_az,
+                description_en, description_ru, price, metadata,
+                categoryId, subcategoryId, ingridients, sizes, status, isStok
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                JSON.stringify(img),
                 name_az,
-                name_en,
-                name_ru,
+                name_en || null,
+                name_ru || null,
                 description_az,
-                description_en,
-                description_ru,
+                description_en || null,
+                description_ru || null,
                 price,
-                metadata,
+                metadata || null,
                 categoryId,
                 subcategoryId,
-                ingridients,
-                sizes,
-                status,
-                isStok
-            }
-        });
+                JSON.stringify(ingridients),
+                JSON.stringify(sizes),
+                status ?? true,
+                isStok ?? true
+            ]
+        );
+
+        const product = {
+            id: result.insertId,
+            img,
+            name_az,
+            name_en,
+            name_ru,
+            description_az,
+            description_en,
+            description_ru,
+            price,
+            metadata,
+            categoryId,
+            subcategoryId,
+            ingridients,
+            sizes,
+            status,
+            isStok
+        };
 
         res.status(201).json({ status: true, product });
     } catch (error) {

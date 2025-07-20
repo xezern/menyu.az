@@ -1,41 +1,42 @@
-const { PrismaClient } = require('@prisma/client');
+const db = require('../../config/db');
 const { endirim } = require('../../utils/endirim');
-const prisma = new PrismaClient();
 
 const getProductsBySubcategory = async (req, res) => {
     try {
         const id = Number(req.params.id);
-
         if (!id) return res.status(400).json({ error: 'Məhsulun id-si mütləq rəqəm olmalıdır!' });
 
         const page = parseInt(req.query.page, 10) || 1;
         const limit = parseInt(req.query.limit, 10) || 10;
-        const skip = (page - 1) * limit;
+        const offset = (page - 1) * limit;
 
-        // Ümumi məhsul sayını əldə edin
-        const totalProducts = await prisma.product.count({
-            where: { subcategoryId: id }
+        const [[{ total }]] = await db.execute('SELECT COUNT(*) as total FROM Product WHERE subcategoryId = ?', [id]);
+        const totalPages = Math.ceil(total / limit);
+
+        const [products] = await db.execute(
+            'SELECT * FROM Product WHERE subcategoryId = ? LIMIT ? OFFSET ?',
+            [id, limit, offset]
+        );
+
+        if (products.length === 0) {
+            return res.status(404).json({ error: `Daxil etdiyiniz id (${id}) üzrə məhsullar tapılmadı!` });
+        }
+
+        const array = products.map(p => {
+            const parsed = {
+                ...p,
+                img: JSON.parse(p.img),
+                ingridients: JSON.parse(p.ingridients),
+                sizes: JSON.parse(p.sizes)
+            };
+            return endirim(parsed);
         });
 
-        // Maksimum səhifə sayını hesablamaq
-        const totalPages = Math.ceil(totalProducts / limit);
-
-        const products = await prisma.product.findMany({
-            where: { subcategoryId: id },
-            skip,
-            take: limit,
-        });
-
-        if (!products.length) return res.status(404).json({ "error": `Daxil etdiyiniz id (${id}) üzrə məhsullar tapılmadı!` });
-
-        const array = products?.map(endirim);
-
-        // Nəticələrə totalProducts və totalPages əlavə edin
         res.status(200).json({
             products: array,
-            totalProducts,
+            totalProducts: total,
             totalPages,
-            currentPage: page,
+            currentPage: page
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
