@@ -9,8 +9,8 @@ const { loginRouter, categoryRouter, imgRouter, productRouter } = require('./src
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// const path = require('path');
-
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/auth', loginRouter);
 app.use('/categories', categoryRouter);
 app.use('/img', imgRouter);

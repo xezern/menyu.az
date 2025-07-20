@@ -1,30 +1,22 @@
-const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
-
-const s3 = new S3Client({
-    region: process.env.AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    }
-});
-
+const fs = require('fs');
+const path = require('path');
 
 const deleteImage = async (req, res) => {
     const { filename } = req.params;
-    const bucketName = process.env.S3_BUCKET_NAME;
-    try {
-        const deleteParams = {
-            Bucket: bucketName,
-            Key: filename,
-        }
-        await s3.send(new DeleteObjectCommand(deleteParams));
 
-        res.status(200).json({ message: 'Image deleted successfully' });
+    const filePath = path.join(__dirname, '..', '..', '..', 'uploads', filename); // doğru yola gedir
+
+    try {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath); 
+            return res.status(200).json({ message: 'Image deleted successfully' });
+        } else {
+            return res.status(404).json({ error: 'File not found' });
+        }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to delete image' });
+        console.error('Error deleting image:', error);
+        return res.status(500).json({ error: 'Failed to delete image' });
     }
 };
 
-
-module.exports = deleteImage; 
+module.exports = deleteImage;
