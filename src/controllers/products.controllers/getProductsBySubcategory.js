@@ -1,5 +1,4 @@
 const db = require('../../config/db');
-const { endirim } = require('../../utils/endirim');
 
 const getProductsBySubcategory = async (req, res) => {
     try {
@@ -22,15 +21,12 @@ const getProductsBySubcategory = async (req, res) => {
             return res.status(404).json({ error: `Daxil etdiyiniz id (${id}) üzrə məhsullar tapılmadı!` });
         }
 
-        const array = products.map(p => {
-            const parsed = {
-                ...p,
-                img: JSON.parse(p.img),
-                ingridients: JSON.parse(p.ingridients),
-                sizes: JSON.parse(p.sizes)
-            };
-            return endirim(parsed);
-        });
+        const array = products.map(p => ({
+            ...p,
+            img: JSON.parse(p.img),
+            ingridients: JSON.parse(p.ingridients),
+            sizes: JSON.parse(p.sizes)
+        }));
 
         res.status(200).json({
             products: array,

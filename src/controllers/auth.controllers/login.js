@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const db = require('../../config/db'); // mysql2 bağlantısı
+const db = require('../../config/db');
 const { generateAccesToken, generateRefreshToken } = require('./jwt.controller');
 
 const login = async (req, res) => {

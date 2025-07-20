@@ -1,6 +1,5 @@
 const db = require('../../config/db');
 const { z } = require('zod');
-const { endirim } = require('../../utils/endirim');
 
 const querySchema = z.object({
   name: z.string()
@@ -21,15 +20,12 @@ const searchProduct = async (req, res) => {
       [`%${name}%`, `%${name}%`, `%${name}%`]
     );
 
-    const array = products.map(p => {
-      const parsed = {
-        ...p,
-        img: JSON.parse(p.img),
-        ingridients: JSON.parse(p.ingridients),
-        sizes: JSON.parse(p.sizes)
-      };
-      return endirim(parsed);
-    });
+    const array = products.map(p => ({
+      ...p,
+      img: JSON.parse(p.img),
+      ingridients: JSON.parse(p.ingridients),
+      sizes: JSON.parse(p.sizes)
+    }));
 
     res.status(200).json({
       products: array,

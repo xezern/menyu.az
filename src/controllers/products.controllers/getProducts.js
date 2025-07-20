@@ -1,5 +1,4 @@
 const db = require('../../config/db');
-const { endirim } = require('../../utils/endirim');
 
 const getProducts = async (req, res) => {
   try {
@@ -12,15 +11,12 @@ const getProducts = async (req, res) => {
 
     const [products] = await db.execute('SELECT * FROM Product LIMIT ? OFFSET ?', [limit, offset]);
 
-    const array = products.map(p => {
-      const parsed = {
-        ...p,
-        img: JSON.parse(p.img),
-        ingridients: JSON.parse(p.ingridients),
-        sizes: JSON.parse(p.sizes)
-      };
-      return endirim(parsed);
-    });
+    const array = products.map(p => ({
+      ...p,
+      img: JSON.parse(p.img),
+      ingridients: JSON.parse(p.ingridients),
+      sizes: JSON.parse(p.sizes)
+    }));
 
     res.status(200).json({
       products: array,
