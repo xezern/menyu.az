@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const db = require('../../config/db'); // mysql2 bağlantısı
 
 const register = async (req, res) => {
