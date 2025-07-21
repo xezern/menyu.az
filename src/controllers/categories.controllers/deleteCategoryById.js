@@ -30,7 +30,7 @@ const deleteCategoryById = async (req, res) => {
     if (imgs && imgs.length > 0) {
       for (const imageUrl of imgs) {
         const filename = imageUrl.split('/').pop();
-        const filePath = path.join(__dirname, '..', '..', 'uploads', filename);
+        const filePath = path.join(__dirname, '..', '..', '..', 'uploads', filename);
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }
@@ -40,7 +40,7 @@ const deleteCategoryById = async (req, res) => {
     await db.execute('DELETE FROM Category WHERE id = ?', [id]);
 
     res.status(200).json({
-      deletecat: category,
+      deletecat: { ...category, img: JSON.parse(category.img) },
       message: 'Category deleted successfully',
     });
   } catch (error) {

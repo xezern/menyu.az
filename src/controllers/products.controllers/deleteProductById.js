@@ -26,7 +26,14 @@ const deleteProductById = async (req, res) => {
 
         await db.execute('DELETE FROM Product WHERE id = ?', [id]);
 
-        res.status(200).json({ message: 'Product deleted successfully', deletedProduct: product });
+        res.status(200).json({
+            message: 'Product deleted successfully', deletedProduct: {
+                ...product,
+                img: JSON.parce(product.img),
+                ingridients: JSON.parce(product.ingridients),
+                sizes: JSON.parce(product.sizes)
+            }
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
