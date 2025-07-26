@@ -7,6 +7,7 @@ const deleteProductById = async (req, res) => {
         const id = Number(req.params.id);
 
         const [rows] = await db.execute('SELECT * FROM Product WHERE id = ?', [id]);
+
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Product not found' });
         }
@@ -27,15 +28,16 @@ const deleteProductById = async (req, res) => {
         await db.execute('DELETE FROM Product WHERE id = ?', [id]);
 
         res.status(200).json({
-            message: 'Product deleted successfully', deletedProduct: {
+            message: 'Product deleted successfully',
+            deletedProduct: {
                 ...product,
-                img: JSON.parce(product.img),
-                ingridients: JSON.parce(product.ingridients),
-                sizes: JSON.parce(product.sizes)
+                img: JSON.parse(product.img),
+                ingridients: JSON.parse(product.ingridients),
+                sizes: JSON.parse(product.sizes)
             }
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error });
     }
 };
 

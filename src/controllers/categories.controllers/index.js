@@ -6,6 +6,7 @@ const getCategoriesById = require('./getCategoriesById');
 const deleteCategoryById = require('./deleteCategoryById');
 const deleteSubcategory = require('./deleteSubcategory');
 const updateSubcategory = require('./updateSubcategory');
+const getSubcategory = require('./getSubcategories');
 
 module.exports = {
     createCategory,
@@ -15,6 +16,7 @@ module.exports = {
     getCategoriesById,
     deleteCategoryById,
     deleteSubcategory,
-    updateSubcategory
+    updateSubcategory,
+    getSubcategory
 };
 

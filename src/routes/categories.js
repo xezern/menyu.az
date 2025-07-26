@@ -7,7 +7,8 @@ const {
     getCategoriesById,
     deleteCategoryById,
     updateSubcategory,
-    deleteSubcategory
+    deleteSubcategory,
+    getSubcategory
 } = require('../controllers/categories.controllers');
 const auth = require('../middlewares/auth.middleware');
 
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.post('/', validator(categorySchema), auth, createCategory);
 router.get('/', getCategories);
+router.get('/subcategories', getSubcategory);
 router.get('/:id', getCategoriesById);
 router.put('/:id', validator(categorySchema), auth, editCategoriesById);
 router.delete('/:id', auth, deleteCategoryById);
