@@ -6,10 +6,34 @@ const getProducts = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const offset = (page - 1) * limit;
 
-    const [[{ total }]] = await db.execute('SELECT COUNT(*) as total FROM Product');
+    const { categoryId, subcategoryId } = req.query;
+
+    let whereClause = '';
+    const whereParams = [];
+
+    if (categoryId) {
+      whereClause += 'categoryId = ? ';
+      whereParams.push(categoryId);
+    }
+
+    if (subcategoryId) {
+      whereClause += (whereClause ? 'AND ' : '') + 'subcategoryId = ? ';
+      whereParams.push(subcategoryId);
+    }
+
+    const whereSQL = whereClause ? `WHERE ${whereClause}` : '';
+
+    const [[{ total }]] = await db.execute(
+      `SELECT COUNT(*) as total FROM Product ${whereSQL}`,
+      whereParams
+    );
+
     const totalPages = Math.ceil(total / limit);
 
-    const [products] = await db.execute('SELECT * FROM Product LIMIT ? OFFSET ?', [limit, offset]);
+    const [products] = await db.execute(
+      `SELECT * FROM Product ${whereSQL} ORDER BY id DESC LIMIT ? OFFSET ?`,
+      [...whereParams, limit, offset]
+    );
 
     const array = products.map(p => ({
       ...p,
