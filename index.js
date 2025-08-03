@@ -1,7 +1,15 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-app.use(cors());
+
+app.use(cors({
+  origin: ['https://admin.caffecino.az', 'https://caffecino.az', 'http://localhost:5555', 'http://localhost:3999'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true 
+}));
+
+app.options('*', cors());
+
 require('dotenv/config');
 
 const { loginRouter, categoryRouter, imgRouter, productRouter } = require('./src/routes');

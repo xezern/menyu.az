@@ -8,7 +8,8 @@ const {
     deleteCategoryById,
     updateSubcategory,
     deleteSubcategory,
-    getSubcategory
+    getSubcategory,
+    patchCategory
 } = require('../controllers/categories.controllers');
 const auth = require('../middlewares/auth.middleware');
 
@@ -20,6 +21,7 @@ router.post('/', validator(categorySchema), auth, createCategory);
 router.get('/', getCategories);
 router.get('/subcategories', getSubcategory);
 router.get('/:id', getCategoriesById);
+router.patch('/:id', auth, patchCategory);
 router.put('/:id', validator(categorySchema), auth, editCategoriesById);
 router.delete('/:id', auth, deleteCategoryById);
 

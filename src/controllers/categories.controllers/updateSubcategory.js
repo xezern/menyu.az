@@ -3,7 +3,7 @@ const { subcategorySchema } = require('../../schema/categories.schema');
 
 const updateSubcategory = async (req, res) => {
     const id = +req.params.id;
-    const { name_az, name_en, name_ru } = req.body;
+    const { name_az, name_en, name_ru, status } = req.body;
 
     if (!id) return res.status(400).json({ error: "Id mütləq göndərilməlidir!" });
 
@@ -19,9 +19,11 @@ const updateSubcategory = async (req, res) => {
             return res.status(404).json({ error: "Subcategory not found." });
         }
 
+        const currentStatus = status !== undefined ? status : rows[0].status;
+
         await db.execute(
-            'UPDATE Subcategory SET name_az = ?, name_en = ?, name_ru = ? WHERE id = ?',
-            [name_az, name_en || null, name_ru || null, id]
+            'UPDATE Subcategory SET name_az = ?, name_en = ?, name_ru = ? , status = ? WHERE id = ?',
+            [name_az, name_en || null, name_ru || null, currentStatus, id]
         );
 
         const [updated] = await db.execute('SELECT * FROM Subcategory WHERE id = ?', [id]);

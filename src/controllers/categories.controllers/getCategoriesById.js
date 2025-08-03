@@ -14,7 +14,6 @@ const getCategoriesById = async (req, res) => {
             'SELECT * FROM Subcategory WHERE categoryId = ?',
             [category.id]
         );
-
         const [products] = await db.execute('SELECT * FROM Product WHERE categoryId = ?', [category.id]);
 
         const subcategoriesWithProducts = subcategories.map(sub => {

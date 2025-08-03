@@ -37,6 +37,7 @@ const getProducts = async (req, res) => {
 
     const array = products.map(p => ({
       ...p,
+      price: Number(p.price.toFixed(2)),
       img: JSON.parse(p.img),
       ingridients: JSON.parse(p.ingridients),
       sizes: JSON.parse(p.sizes)
